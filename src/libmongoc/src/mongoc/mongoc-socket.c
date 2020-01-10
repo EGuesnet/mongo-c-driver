@@ -348,6 +348,11 @@ mongoc_socket_poll (mongoc_socket_poll_t *sds, /* IN */
    ret = poll (pfds, nsds, timeout);
    for (i = 0; i < nsds; i++) {
       sds[i].revents = pfds[i].revents;
+#if defined(_AIX)
+      if (sds[i].socket->errno_ == ECONNREFUSED) {
+         sds[i].revents |= POLLHUP;
+      }
+#endif
    }
 
    bson_free (pfds);
